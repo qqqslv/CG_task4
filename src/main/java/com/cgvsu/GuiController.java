@@ -1,5 +1,6 @@
 package com.cgvsu;
 
+import com.cgvsu.objwriter.ObjWriter;
 import com.cgvsu.render_engine.RenderEngine;
 import javafx.fxml.FXML;
 import javafx.animation.Animation;
@@ -70,7 +71,7 @@ public class GuiController {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
         fileChooser.setTitle("Load Model");
 
-        File file = fileChooser.showOpenDialog((Stage) canvas.getScene().getWindow());
+        File file = fileChooser.showOpenDialog(canvas.getScene().getWindow());
         if (file == null) {
             return;
         }
@@ -80,6 +81,25 @@ public class GuiController {
         try {
             String fileContent = Files.readString(fileName);
             mesh = ObjReader.read(fileContent);
+            // todo: обработка ошибок
+        } catch (IOException exception) {
+
+        }
+    }
+
+    @FXML
+    private void onSaveModelMenuItemClick() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
+        fileChooser.setTitle("Save Model");
+
+        File file = fileChooser.showSaveDialog(canvas.getScene().getWindow());
+        if (file == null) {
+            return;
+        }
+
+        try {
+            ObjWriter.write(mesh, file.getAbsolutePath());
             // todo: обработка ошибок
         } catch (IOException exception) {
 
