@@ -7,8 +7,14 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
@@ -64,12 +70,40 @@ public class GuiController {
         timeline.getKeyFrames().add(frame);
         timeline.play();
     }
+    private void showExceptionMessage(String text) {
+        Stage excStage = new Stage();
+        excStage.setTitle("Уведомление");
 
+        Text excText = new Text(text);
+        excText.getStyleClass().add("exception-text");
+
+        TextArea excTextArea = new TextArea(text);
+        excTextArea.setWrapText(true);
+        excTextArea.setEditable(false);
+        excTextArea.getStyleClass().add("exception-textarea");
+
+        Button closeButton = new Button("Закрыть");
+        closeButton.setOnAction(e -> excStage.close());
+        closeButton.getStyleClass().add("close-button");
+
+        StackPane root = new StackPane();
+        root.getChildren().addAll(excText, closeButton);
+        root.getStyleClass().add("exception-window");
+
+        StackPane.setAlignment(excTextArea, Pos.CENTER);
+        StackPane.setAlignment(closeButton, Pos.BOTTOM_CENTER);
+
+        Scene scene = new Scene(root, 800, 100);
+        excStage.setScene(scene);
+
+        excStage.show();
+
+    }
     @FXML
     private void onOpenModelMenuItemClick() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
-        fileChooser.setTitle("Load Model");
+        fileChooser.setTitle("Загрузить модель");
 
         File file = fileChooser.showOpenDialog(canvas.getScene().getWindow());
         if (file == null) {
@@ -81,9 +115,9 @@ public class GuiController {
         try {
             String fileContent = Files.readString(fileName);
             mesh = ObjReader.read(fileContent);
-            // todo: обработка ошибок
+            showExceptionMessage("Модель загружена");
         } catch (IOException exception) {
-
+            showExceptionMessage("Не удалось загрузить модель: " + exception.getMessage());
         }
     }
 
@@ -91,7 +125,7 @@ public class GuiController {
     private void onSaveModelMenuItemClick() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
-        fileChooser.setTitle("Save Model");
+        fileChooser.setTitle("Сохранить модель");
 
         File file = fileChooser.showSaveDialog(canvas.getScene().getWindow());
         if (file == null) {
@@ -100,9 +134,9 @@ public class GuiController {
 
         try {
             ObjWriter.write(mesh, file.getAbsolutePath());
-            // todo: обработка ошибок
+            showExceptionMessage("Модель сохранена");
         } catch (IOException exception) {
-
+            showExceptionMessage("Не удалось сохранить модель: " + exception.getMessage());
         }
     }
 

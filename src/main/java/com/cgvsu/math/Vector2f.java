@@ -7,5 +7,13 @@ public class Vector2f {
         this.y = y;
     }
 
-    public float x, y;
+    float x, y;
+
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
 }

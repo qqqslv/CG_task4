@@ -14,5 +14,17 @@ public class Vector3f {
         return Math.abs(x - other.x) < eps && Math.abs(y - other.y) < eps && Math.abs(z - other.z) < eps;
     }
 
-    public float x, y, z;
+    float x, y, z;
+
+    public float getY() {
+        return y;
+    }
+
+    public float getZ() {
+        return z;
+    }
+
+    public float getX() {
+        return x;
+    }
 }
