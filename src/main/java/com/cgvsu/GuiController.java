@@ -18,15 +18,15 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
-import java.nio.file.Files;
-import java.nio.file.Path;
+
 import java.io.IOException;
 import java.io.File;
 import javax.vecmath.Vector3f;
 
 import com.cgvsu.model.Model;
-import com.cgvsu.objreader.ObjReader;
 import com.cgvsu.render_engine.Camera;
+
+import static com.cgvsu.GuiUtils.selectedModel;
 
 public class GuiController {
 
@@ -100,29 +100,22 @@ public class GuiController {
 
     }
     @FXML
-    private void onOpenModelMenuItemClick() {
+    private void onAddModelMenuItemClick() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
         fileChooser.setTitle("Загрузить модель");
 
+        //доработать, нужно составить примерный gui в SceneBuilder и заменить canvas чем-то
         File file = fileChooser.showOpenDialog(canvas.getScene().getWindow());
-        if (file == null) {
-            return;
-        }
-
-        Path fileName = Path.of(file.getAbsolutePath());
-
-        try {
-            String fileContent = Files.readString(fileName);
-            mesh = ObjReader.read(fileContent);
-            showExceptionMessage("Модель загружена");
-        } catch (IOException exception) {
-            showExceptionMessage("Не удалось загрузить модель: " + exception.getMessage());
-        }
+        Model model = GuiUtils.addModel(file);
     }
 
     @FXML
     private void onSaveModelMenuItemClick() {
+        if (selectedModel == null) {
+            showExceptionMessage("Необходимо выбрать модель");
+            return;
+        }
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
         fileChooser.setTitle("Сохранить модель");
@@ -133,7 +126,7 @@ public class GuiController {
         }
 
         try {
-            ObjWriter.write(mesh, file.getAbsolutePath());
+            ObjWriter.write(selectedModel, file.getAbsolutePath());
             showExceptionMessage("Модель сохранена");
         } catch (IOException exception) {
             showExceptionMessage("Не удалось сохранить модель: " + exception.getMessage());
