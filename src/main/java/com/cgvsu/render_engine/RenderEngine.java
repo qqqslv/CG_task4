@@ -76,7 +76,7 @@ public class RenderEngine {
 
         for (int i = 0; i < nVertices; i++) {
             Vector3f vertex = model.vertices.get(i);
-            javax.vecmath.Vector3f vertexVecmath = new javax.vecmath.Vector3f(vertex.getX(), vertex.getY(), vertex.getZ());
+            Vector3f vertexVecmath = new Vector3f(vertex.getX(), vertex.getY(), vertex.getZ());
 
             Point2f screenPoint = vertexToPoint(multiplyMatrix4ByVector3(modelViewProjectionMatrix, vertexVecmath), width, height);
 

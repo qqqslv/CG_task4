@@ -4,7 +4,7 @@ import com.cgvsu.model.Model;
 import com.cgvsu.objreader.ObjReader;
 import com.cgvsu.render_engine.Camera;
 
-import javax.vecmath.Vector3f;
+import com.cgvsu.math.Vector3f;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
