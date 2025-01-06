@@ -106,6 +106,7 @@
                                                    <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                                                       <children>
                                                          <Button alignment="CENTER" mnemonicParsing="false" onAction="#onAddCamera" text="Добавить камеру" />
+                                                         <Button alignment="CENTER" mnemonicParsing="false" onAction="#onEditCamera" text="Изменить камеру" />
                                                          <Button alignment="CENTER" mnemonicParsing="false" onAction="#onDeleteCamera" text="Удалить камеру" />
                                                       </children>
                                                       <padding>

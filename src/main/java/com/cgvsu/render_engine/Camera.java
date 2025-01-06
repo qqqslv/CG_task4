@@ -18,13 +18,13 @@ public class Camera {
         this.nearPlane = nearPlane;
         this.farPlane = farPlane;
     }
-    public Camera(Camera other) {
-        this.position = new Vector3f(other.position);
-        this.target = new Vector3f(other.target);
-        this.fov = other.fov;
-        this.aspectRatio = other.aspectRatio;
-        this.nearPlane = other.nearPlane;
-        this.farPlane = other.farPlane;
+    public Camera(Camera cam) {
+        this.position = new Vector3f(cam.position);
+        this.target = new Vector3f(cam.target);
+        this.fov = cam.fov;
+        this.aspectRatio = cam.aspectRatio;
+        this.nearPlane = cam.nearPlane;
+        this.farPlane = cam.farPlane;
     }
 
     public void setFov(float fov) {

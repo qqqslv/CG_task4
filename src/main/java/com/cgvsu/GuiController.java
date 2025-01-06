@@ -58,7 +58,6 @@ public class GuiController {
     private TextField camZ;
     @FXML
     private ListView<Camera> camerasListView;
-    public static Camera selectedCamera;
     @FXML
     private ListView<Model> modelListView;
     @FXML
@@ -140,26 +139,8 @@ public class GuiController {
                     super.updateItem(camera, empty);
                     if (empty || camera == null) {
                         setText(null);
-                        setContextMenu(null);
                     } else {
-                        setText("Camera (" + camera.getPosition().x + ", " + camera.getPosition().y + ", " + camera.getPosition().z + ")");
-
-                        ContextMenu contextMenu = new ContextMenu();
-
-                        MenuItem editItem = new MenuItem("Edit");
-                        editItem.setOnAction(e -> {
-                            if (selectedCamera != null) {
-                                openEditDialog(camera);
-                            } else {
-                                showExceptionMessage("Выберите камеру перед редактированием.");
-                            }
-                        });
-
-                        MenuItem deleteItem = new MenuItem("Delete");
-                        deleteItem.setOnAction(e -> GuiUtils.removeCamera(camera));
-
-                        contextMenu.getItems().addAll(editItem, deleteItem);
-                        setContextMenu(contextMenu);
+                        setText("Камера (" + camera.getPosition().x + ", " + camera.getPosition().y + ", " + camera.getPosition().z + ")");
                     }
                 }
             };
@@ -304,7 +285,15 @@ public class GuiController {
         }
     }
     @FXML
-    void onDeleteCamera(ActionEvent event) {
+    void onEditCamera() {
+        if (selectedCamera != null) {
+            openEditDialog(selectedCamera);
+        } else {
+            showExceptionMessage("Выберите камеру перед редактированием.");
+        }
+    }
+    @FXML
+    void onDeleteCamera() {
         if (selectedCamera != null && (cameras.size() > 1) && !selectedCamera.equals(mainCamera)) {
             GuiUtils.removeCamera(selectedCamera);
             camerasListView.getItems().remove(camerasListView.getSelectionModel().getSelectedItem());
