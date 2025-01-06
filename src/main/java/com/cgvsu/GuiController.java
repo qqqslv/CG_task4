@@ -32,10 +32,11 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.io.File;
 import java.util.Objects;
-import javax.vecmath.Vector3f;
 
 import com.cgvsu.model.Model;
 import com.cgvsu.render_engine.Camera;
+import com.cgvsu.math.*;
+
 
 import static com.cgvsu.GuiUtils.*;
 import static com.cgvsu.render_engine.RenderEngine.deleteSelectedVertices;

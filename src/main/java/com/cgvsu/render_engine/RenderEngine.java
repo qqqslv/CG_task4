@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import com.cgvsu.math.Vector3f;
 import com.cgvsu.model.Polygon;
 import javafx.scene.canvas.GraphicsContext;
-import javax.vecmath.*;
+import com.cgvsu.math.*;
 import com.cgvsu.model.Model;
 import javafx.scene.paint.Color;
 
@@ -27,8 +27,8 @@ public class RenderEngine {
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
 
         Matrix4f modelViewProjectionMatrix = new Matrix4f(modelMatrix);
-        modelViewProjectionMatrix.mul(viewMatrix);
-        modelViewProjectionMatrix.mul(projectionMatrix);
+        modelViewProjectionMatrix.mult(viewMatrix);
+        modelViewProjectionMatrix.mult(projectionMatrix);
 
         final int nPolygons = model.polygons.size();
         for (int polygonInd = 0; polygonInd < nPolygons; ++polygonInd) {
@@ -38,7 +38,7 @@ public class RenderEngine {
             for (int vertexInPolygonInd = 0; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {
                 Vector3f vertex = model.vertices.get(model.polygons.get(polygonInd).getVertexIndices().get(vertexInPolygonInd));
 
-                javax.vecmath.Vector3f vertexVecmath = new javax.vecmath.Vector3f(vertex.getX(), vertex.getY(), vertex.getZ());
+                Vector3f vertexVecmath = new Vector3f(vertex.getX(), vertex.getY(), vertex.getZ());
 
                 Point2f resultPoint = vertexToPoint(multiplyMatrix4ByVector3(modelViewProjectionMatrix, vertexVecmath), width, height);
                 resultPoints.add(resultPoint);
@@ -76,7 +76,7 @@ public class RenderEngine {
 
         for (int i = 0; i < nVertices; i++) {
             Vector3f vertex = model.vertices.get(i);
-            javax.vecmath.Vector3f vertexVecmath = new javax.vecmath.Vector3f(vertex.getX(), vertex.getY(), vertex.getZ());
+            Vector3f vertexVecmath = new Vector3f(vertex.getX(), vertex.getY(), vertex.getZ());
 
             Point2f screenPoint = vertexToPoint(multiplyMatrix4ByVector3(modelViewProjectionMatrix, vertexVecmath), width, height);
 
