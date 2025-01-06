@@ -39,8 +39,8 @@ import com.cgvsu.math.*;
 
 
 import static com.cgvsu.GuiUtils.*;
-import static com.cgvsu.render_engine.RenderEngine.deleteSelectedVertices;
-import static com.cgvsu.render_engine.RenderEngine.selectedVertexIndices;
+import static com.cgvsu.render_engine.RenderEngine.*;
+import static com.cgvsu.render_engine.RenderEngine.resetSelectedVertices;
 
 public class GuiController {
 
@@ -104,7 +104,6 @@ public class GuiController {
 
                 if (empty || model == null) {
                     setText(null);
-                    setContextMenu(null);
                 } else {
                     setText(model.getName());
 
@@ -112,8 +111,14 @@ public class GuiController {
                         if (event.getButton() == MouseButton.PRIMARY) {
                             if (selectedModel == model) {
                                 selectedModel = null;
+                                updateButtonState();
+                                vertexListView.getItems().clear();
+                                resetSelectedVertices();
                             } else {
                                 selectedModel = model;
+                                updateButtonState();
+                                updateVertexList();
+                                resetSelectedVertices();
                             }
                         }
                     });
@@ -193,30 +198,30 @@ public class GuiController {
         Stage editStage = new Stage();
         editStage.initStyle(StageStyle.TRANSPARENT);
 
-        editStage.setTitle("Edit Camera");
+        editStage.setTitle("Редактировать камеру");
         editStage.initModality(Modality.APPLICATION_MODAL);
 
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(15));
         layout.setAlignment(Pos.CENTER);
 
-        Label positionLabel = new Label("Camera Position:");
+        Label positionLabel = new Label("Позиция камеры:");
         TextField xField = new TextField(String.valueOf(camera.getPosition().x));
-        xField.setPromptText("X Coordinate");
+        xField.setPromptText("X координата");
         TextField yField = new TextField(String.valueOf(camera.getPosition().y));
-        yField.setPromptText("Y Coordinate");
+        yField.setPromptText("Y координата");
         TextField zField = new TextField(String.valueOf(camera.getPosition().z));
-        zField.setPromptText("Z Coordinate");
+        zField.setPromptText("Z координата");
 
-        Label targetLabel = new Label("Camera Target:");
+        Label targetLabel = new Label("Цель камеры:");
         TextField targetXField = new TextField(String.valueOf(camera.getTarget().x));
-        targetXField.setPromptText("Target X Coordinate");
+        targetXField.setPromptText("X координата цели");
         TextField targetYField = new TextField(String.valueOf(camera.getTarget().y));
-        targetYField.setPromptText("Target Y Coordinate");
+        targetYField.setPromptText("Y координата цели");
         TextField targetZField = new TextField(String.valueOf(camera.getTarget().z));
-        targetZField.setPromptText("Target Z Coordinate");
+        targetZField.setPromptText("Z координата цели");
 
-        Label fovLabel = new Label("Field of View:");
+        Label fovLabel = new Label("FOV:");
         Slider fovSlider = new Slider(0.1, 180, camera.getFov());
         fovSlider.setShowTickLabels(true);
         fovSlider.setShowTickMarks(true);
@@ -224,21 +229,21 @@ public class GuiController {
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER);
 
-        Button saveButton = new Button("Save");
-        Button cancelButton = new Button("Cancel");
+        Button saveButton = new Button("Сохранить");
+        Button cancelButton = new Button("Отмена");
 
         buttonBox.getChildren().addAll(saveButton, cancelButton);
 
         layout.getChildren().addAll(
-                new Label("Edit Camera Parameters"),
+                new Label("Редактировать параметры камеры"),
                 positionLabel,
                 new Label("X:"), xField,
                 new Label("Y:"), yField,
                 new Label("Z:"), zField,
                 targetLabel,
-                new Label("Target X:"), targetXField,
-                new Label("Target Y:"), targetYField,
-                new Label("Target Z:"), targetZField,
+                new Label("Цель X:"), targetXField,
+                new Label("Цель Y:"), targetYField,
+                new Label("Цель Z:"), targetZField,
                 fovLabel, fovSlider,
                 buttonBox
         );
@@ -305,34 +310,6 @@ public class GuiController {
             showExceptionMessage("Невозможно удалить камеру");
         }
     }
-//    private Camera selectedCamera1;
-//    private Camera selectedCamera2;
-//    public void updateWindowState1(){
-//        isWindow1 = box1.isSelected();
-//        if (cameras.size()==1){
-//            selectedCamera1 = selectedCamera;
-//            selectedCamera2 = selectedCamera;
-//        }
-//
-//        if (isWindow1 && isSelectedCamera){
-//            selectedCamera1 = selectedCamera;
-//            selectedCamera2 = cameras.get(cameras.size()-2);
-//        }
-//
-//    }
-//
-//    public void updateWindowState2(){
-//        isWindow2 = box2.isSelected();
-//
-//        if (cameras.size()==1){
-//            selectedCamera1 = selectedCamera;
-//            selectedCamera2 = selectedCamera;
-//        }
-//        if (isWindow2 && isSelectedCamera){
-//            selectedCamera2 = selectedCamera;
-//            selectedCamera1 = cameras.get(cameras.size()-2);
-//        }
-//    }
 
     private void renderScene() {
         GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -341,10 +318,17 @@ public class GuiController {
 
         double canvasWidth = canvas.getWidth();
         double canvasHeight = canvas.getHeight();
-        selectedCamera.setAspectRatio((float) (canvasWidth / canvasHeight));
+        mainCamera.setAspectRatio((float) (canvasWidth / canvasHeight));
 
         for (Model model : models) {
-            RenderEngine.render(gc, selectedCamera, model, (int) canvasWidth, (int) canvasHeight);
+            RenderEngine.render(gc, mainCamera, model, (int) canvasWidth, (int) canvasHeight);
+        }
+    }
+    private void updateButtonState() {
+        if (selectedModel == null) {
+            verticesToggleButton.setSelected(false);
+        } else {
+            verticesToggleButton.setSelected(selectedModel.isVerticesVisible());
         }
     }
     @FXML

@@ -13,7 +13,7 @@ import static com.cgvsu.render_engine.GraphicConveyor.*;
 
 public class RenderEngine {
     public static ArrayList<Integer> selectedVertexIndices = new ArrayList<>();
-    private static final double POINT_SIZE = 3.0;
+    private static final double POINT_SIZE = 6.0;
 
     public static void render(
             final GraphicsContext graphicsContext,
@@ -88,6 +88,9 @@ public class RenderEngine {
 
             graphicsContext.fillOval(screenPoint.x - POINT_SIZE / 2, screenPoint.y - POINT_SIZE / 2, POINT_SIZE, POINT_SIZE);
         }
+    }
+    public static void resetSelectedVertices() {
+        selectedVertexIndices.clear();
     }
 
     public static void deleteSelectedVertices(Model model) {
