@@ -7,11 +7,13 @@ import com.cgvsu.model.Polygon;
 import javafx.scene.canvas.GraphicsContext;
 import javax.vecmath.*;
 import com.cgvsu.model.Model;
+import javafx.scene.paint.Color;
 
 import static com.cgvsu.render_engine.GraphicConveyor.*;
 
 public class RenderEngine {
-//    public static ArrayList<Integer> selectedVertexIndices = new ArrayList<>();
+    public static ArrayList<Integer> selectedVertexIndices = new ArrayList<>();
+    private static final double POINT_SIZE = 3.0;
 
     public static void render(
             final GraphicsContext graphicsContext,
@@ -56,6 +58,67 @@ public class RenderEngine {
                         resultPoints.get(nVerticesInPolygon - 1).y,
                         resultPoints.get(0).x,
                         resultPoints.get(0).y);
+
+            if (model.isVerticesVisible()) {
+                renderVertices(graphicsContext, model, modelViewProjectionMatrix, width, height);
+            }
+        }
+    }
+
+    private static void renderVertices(
+            final GraphicsContext graphicsContext,
+            final Model model,
+            final Matrix4f modelViewProjectionMatrix,
+            final int width,
+            final int height) {
+
+        final int nVertices = model.vertices.size();
+
+        for (int i = 0; i < nVertices; i++) {
+            Vector3f vertex = model.vertices.get(i);
+            javax.vecmath.Vector3f vertexVecmath = new javax.vecmath.Vector3f(vertex.getX(), vertex.getY(), vertex.getZ());
+
+            Point2f screenPoint = vertexToPoint(multiplyMatrix4ByVector3(modelViewProjectionMatrix, vertexVecmath), width, height);
+
+            if (selectedVertexIndices.contains(i)) {
+                graphicsContext.setFill(Color.RED);
+            } else {
+                graphicsContext.setFill(Color.BLUE);
+            }
+
+            graphicsContext.fillOval(screenPoint.x - POINT_SIZE / 2, screenPoint.y - POINT_SIZE / 2, POINT_SIZE, POINT_SIZE);
+        }
+    }
+
+    public static void deleteSelectedVertices(Model model) {
+        if (!selectedVertexIndices.isEmpty()) {
+            for (int i = selectedVertexIndices.size() - 1; i >= 0; i--) {
+                int index = selectedVertexIndices.get(i);
+                model.vertices.remove(index);
+
+                for (Polygon polygon : model.polygons) {
+                    polygon.getVertexIndices().removeIf(vertexIndex -> vertexIndex == index);
+                    for (int j = 0; j < polygon.getVertexIndices().size(); j++) {
+                        if (polygon.getVertexIndices().get(j) > index) {
+                            polygon.getVertexIndices().set(j, polygon.getVertexIndices().get(j) - 1);
+                        }
+                    }
+                }
+            }
+            selectedVertexIndices.clear();
+        }
+    }
+    public static void toggleVerticesVisibility(Model selectedModel) {
+        if (selectedModel != null) {
+            selectedModel.setVerticesVisible(selectedModel.isVerticesVisible() ? false : true);
+        }
+    }
+
+    public static void toggleVertexSelection(int index) {
+        if (selectedVertexIndices.contains(index)) {
+            selectedVertexIndices.remove(Integer.valueOf(index));
+        } else {
+            selectedVertexIndices.add(index);
         }
     }
 }

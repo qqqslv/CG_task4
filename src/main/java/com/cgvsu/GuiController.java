@@ -2,32 +2,44 @@ package com.cgvsu;
 
 import com.cgvsu.objwriter.ObjWriter;
 import com.cgvsu.render_engine.RenderEngine;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.io.IOException;
 import java.io.File;
+import java.util.Objects;
 import javax.vecmath.Vector3f;
 
 import com.cgvsu.model.Model;
 import com.cgvsu.render_engine.Camera;
 
-import static com.cgvsu.GuiUtils.models;
-import static com.cgvsu.GuiUtils.selectedModel;
+import static com.cgvsu.GuiUtils.*;
+import static com.cgvsu.render_engine.RenderEngine.deleteSelectedVertices;
+import static com.cgvsu.render_engine.RenderEngine.selectedVertexIndices;
 
 public class GuiController {
 
@@ -39,11 +51,23 @@ public class GuiController {
     @FXML
     private Canvas canvas;
     @FXML
+    private TextField camX;
+    @FXML
+    private TextField camY;
+    @FXML
+    private TextField camZ;
+    @FXML
+    private ListView<Camera> camerasListView;
+    public static Camera selectedCamera;
+    @FXML
     private ListView<Model> modelListView;
     @FXML
-    private ListView<Model> vertexListView;
+    private ListView<String> vertexListView;
+    @FXML
+    private ToggleButton verticesToggleButton;
+    private boolean isSelectedCamera = false;
 
-    private Camera camera = new Camera(
+    private Camera mainCamera = new Camera(
             new Vector3f(0, 0, 200),
             new Vector3f(0, 0, 0),
             1.0F, 1, 0.01F, 200);
@@ -63,10 +87,10 @@ public class GuiController {
             double height = canvas.getHeight();
 
             canvas.getGraphicsContext2D().clearRect(0, 0, width, height);
-            camera.setAspectRatio((float) (width / height));
+            mainCamera.setAspectRatio((float) (width / height));
 
             for (Model model : models) {
-                RenderEngine.render(canvas.getGraphicsContext2D(), camera, model, (int) width, (int) height);
+                RenderEngine.render(canvas.getGraphicsContext2D(), mainCamera, model, (int) width, (int) height);
             }
         });
 
@@ -96,6 +120,60 @@ public class GuiController {
                 }
             }
         });
+
+        vertexListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        vertexListView.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.SPACE) {
+                handleVertexSelection();
+                event.consume();
+            }
+        });
+        verticesToggleButton.setOnAction(event -> handleToggleVerticesAction());
+
+        cameras = FXCollections.observableArrayList();
+        camerasListView.setItems((ObservableList<Camera>) cameras);
+
+        camerasListView.setCellFactory(e -> {
+            ListCell<Camera> cell = new ListCell<>() {
+                @Override
+                protected void updateItem(Camera camera, boolean empty) {
+                    super.updateItem(camera, empty);
+                    if (empty || camera == null) {
+                        setText(null);
+                        setContextMenu(null);
+                    } else {
+                        setText("Camera (" + camera.getPosition().x + ", " + camera.getPosition().y + ", " + camera.getPosition().z + ")");
+
+                        ContextMenu contextMenu = new ContextMenu();
+
+                        MenuItem editItem = new MenuItem("Edit");
+                        editItem.setOnAction(e -> {
+                            if (selectedCamera != null) {
+                                openEditDialog(camera);
+                            } else {
+                                showExceptionMessage("Выберите камеру перед редактированием.");
+                            }
+                        });
+
+                        MenuItem deleteItem = new MenuItem("Delete");
+                        deleteItem.setOnAction(e -> GuiUtils.removeCamera(camera));
+
+                        contextMenu.getItems().addAll(editItem, deleteItem);
+                        setContextMenu(contextMenu);
+                    }
+                }
+            };
+
+            cell.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.PRIMARY && !cell.isEmpty()) {
+                    selectedCamera = cell.getItem();
+                    mainCamera = new Camera(selectedCamera);
+                }
+            });
+
+            return cell;
+        });
+
     }
 
     private void showExceptionMessage(String text) {
@@ -127,6 +205,250 @@ public class GuiController {
         excStage.show();
 
     }
+    private void openEditDialog(Camera camera) {
+        if (camera == null) return;
+
+        Stage editStage = new Stage();
+        editStage.initStyle(StageStyle.TRANSPARENT);
+
+        editStage.setTitle("Edit Camera");
+        editStage.initModality(Modality.APPLICATION_MODAL);
+
+        VBox layout = new VBox(10);
+        layout.setPadding(new Insets(15));
+        layout.setAlignment(Pos.CENTER);
+
+        Label positionLabel = new Label("Camera Position:");
+        TextField xField = new TextField(String.valueOf(camera.getPosition().x));
+        xField.setPromptText("X Coordinate");
+        TextField yField = new TextField(String.valueOf(camera.getPosition().y));
+        yField.setPromptText("Y Coordinate");
+        TextField zField = new TextField(String.valueOf(camera.getPosition().z));
+        zField.setPromptText("Z Coordinate");
+
+        Label targetLabel = new Label("Camera Target:");
+        TextField targetXField = new TextField(String.valueOf(camera.getTarget().x));
+        targetXField.setPromptText("Target X Coordinate");
+        TextField targetYField = new TextField(String.valueOf(camera.getTarget().y));
+        targetYField.setPromptText("Target Y Coordinate");
+        TextField targetZField = new TextField(String.valueOf(camera.getTarget().z));
+        targetZField.setPromptText("Target Z Coordinate");
+
+        Label fovLabel = new Label("Field of View:");
+        Slider fovSlider = new Slider(0.1, 180, camera.getFov());
+        fovSlider.setShowTickLabels(true);
+        fovSlider.setShowTickMarks(true);
+
+        HBox buttonBox = new HBox(10);
+        buttonBox.setAlignment(Pos.CENTER);
+
+        Button saveButton = new Button("Save");
+        Button cancelButton = new Button("Cancel");
+
+        buttonBox.getChildren().addAll(saveButton, cancelButton);
+
+        layout.getChildren().addAll(
+                new Label("Edit Camera Parameters"),
+                positionLabel,
+                new Label("X:"), xField,
+                new Label("Y:"), yField,
+                new Label("Z:"), zField,
+                targetLabel,
+                new Label("Target X:"), targetXField,
+                new Label("Target Y:"), targetYField,
+                new Label("Target Z:"), targetZField,
+                fovLabel, fovSlider,
+                buttonBox
+        );
+
+        Scene scene = new Scene(layout, 350, 600);
+        editStage.setScene(scene);
+
+        saveButton.setOnAction(e -> {
+            try {
+                float x = Float.parseFloat(xField.getText());
+                float y = Float.parseFloat(yField.getText());
+                float z = Float.parseFloat(zField.getText());
+
+                float targetX = Float.parseFloat(targetXField.getText());
+                float targetY = Float.parseFloat(targetYField.getText());
+                float targetZ = Float.parseFloat(targetZField.getText());
+
+                float fov = (float) fovSlider.getValue();
+
+                GuiUtils.setCamera(camera, x, y, z, targetX, targetY, targetZ, fov);
+
+                camerasListView.refresh();
+
+                editStage.close();
+            } catch (NumberFormatException ex) {
+                showExceptionMessage("Ошибка: некорректные значения в полях");
+            }
+        });
+
+        cancelButton.setOnAction(e -> editStage.close());
+
+        editStage.showAndWait();
+    }
+    @FXML
+    void onAddCamera() {
+        if (!Objects.equals(camX.getText(), "") && !Objects.equals(camY.getText(), "") && !Objects.equals(camZ.getText(), "")) {
+            float x = Float.parseFloat(camX.getText());
+            float y = Float.parseFloat(camY.getText());
+            float z = Float.parseFloat(camZ.getText());
+            Camera newCamera = GuiUtils.createCamera(x, y, z);
+            cameras.add(newCamera);
+            camerasListView.getItems().add(newCamera);
+        } else {
+            showExceptionMessage("Введены не все координаты камеры");
+        }
+    }
+    @FXML
+    void onDeleteCamera(ActionEvent event) {
+        if (selectedCamera != null && (cameras.size() > 1) && !selectedCamera.equals(mainCamera)) {
+            GuiUtils.removeCamera(selectedCamera);
+            camerasListView.getItems().remove(camerasListView.getSelectionModel().getSelectedItem());
+            selectedCamera = mainCamera;
+            String s = "Main camera " + selectedCamera.getPosition();
+            camerasListView.getSelectionModel().select(camerasListView.getItems().get(0));
+        } else {
+            showExceptionMessage("Невозможно удалить камеру");
+        }
+    }
+//    private Camera selectedCamera1;
+//    private Camera selectedCamera2;
+//    public void updateWindowState1(){
+//        isWindow1 = box1.isSelected();
+//        if (cameras.size()==1){
+//            selectedCamera1 = selectedCamera;
+//            selectedCamera2 = selectedCamera;
+//        }
+//
+//        if (isWindow1 && isSelectedCamera){
+//            selectedCamera1 = selectedCamera;
+//            selectedCamera2 = cameras.get(cameras.size()-2);
+//        }
+//
+//    }
+//
+//    public void updateWindowState2(){
+//        isWindow2 = box2.isSelected();
+//
+//        if (cameras.size()==1){
+//            selectedCamera1 = selectedCamera;
+//            selectedCamera2 = selectedCamera;
+//        }
+//        if (isWindow2 && isSelectedCamera){
+//            selectedCamera2 = selectedCamera;
+//            selectedCamera1 = cameras.get(cameras.size()-2);
+//        }
+//    }
+
+    private void renderScene() {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
+        double canvasWidth = canvas.getWidth();
+        double canvasHeight = canvas.getHeight();
+        selectedCamera.setAspectRatio((float) (canvasWidth / canvasHeight));
+
+        for (Model model : models) {
+            RenderEngine.render(gc, selectedCamera, model, (int) canvasWidth, (int) canvasHeight);
+        }
+    }
+    @FXML
+    void onDeleteVerticesButton() {
+        if (selectedModel == null) {
+            showExceptionMessage("Модель не выбрана");
+            return;
+        }
+        deleteSelectedVertices(selectedModel);
+        updateVertexList();
+        renderScene();
+    }
+    public void handleToggleVerticesAction() {
+        if (selectedModel == null) {
+            showExceptionMessage("Модель не выбрана");
+            verticesToggleButton.setSelected(false);
+            return;
+        }
+
+        RenderEngine.toggleVerticesVisibility(selectedModel);
+        renderScene();
+    }
+    private void handleVertexSelection() {
+        ObservableList<Integer> selectedIndices = vertexListView.getSelectionModel().getSelectedIndices();
+
+        for (Integer index : selectedIndices) {
+            if (selectedVertexIndices.contains(index)) {
+                selectedVertexIndices.remove(index);
+            } else {
+                selectedVertexIndices.add(index);
+            }
+        }
+        updateVertexList();
+    }
+    private void updateVertexList() {
+        vertexListView.getItems().clear();
+
+        if (selectedModel != null) {
+            for (int i = 0; i < selectedModel.vertices.size(); i++) {
+                com.cgvsu.math.Vector3f vertex = selectedModel.vertices.get(i);
+                vertexListView.getItems().add("Vertex " + i + ": (" + vertex.getX() + ", " + vertex.getY() + ", " + vertex.getZ() + ")");
+            }
+        }
+
+        vertexListView.setCellFactory(param -> new VertexListCell());
+    }
+    public class VertexListCell extends ListCell<String> {
+        private final CheckBox checkBox;
+        private final Text vertexText;
+
+        public VertexListCell() {
+            HBox hbox = new HBox(10);
+            vertexText = new Text();
+            checkBox = new CheckBox();
+            hbox.getChildren().addAll(vertexText, checkBox);
+            setGraphic(hbox);
+        }
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (empty) {
+                setGraphic(null);
+            } else {
+                vertexText.setText(item);
+                vertexText.setFill(Color.BLACK);
+
+                int index = getIndex();
+
+                checkBox.setSelected(selectedVertexIndices.contains(index));
+                checkBox.setOnAction(event -> toggleSelection(index));
+                vertexText.setOnMouseClicked(event -> toggleSelection(index));
+
+                HBox hbox = new HBox();
+                hbox.setSpacing(10);
+                hbox.getChildren().add(checkBox);
+                hbox.getChildren().add(vertexText);
+                hbox.setAlignment(Pos.CENTER_LEFT);
+
+                setGraphic(hbox);
+            }
+        }
+
+        private void toggleSelection(int index) {
+            if (selectedVertexIndices.contains(index)) {
+                selectedVertexIndices.remove(Integer.valueOf(index));
+            } else {
+                selectedVertexIndices.add(index);
+            }
+
+            updateVertexList();
+        }
+    }
+
     @FXML
     void onDeleteModel() {
         if (selectedModel == null) {
@@ -177,31 +499,31 @@ public class GuiController {
 
     @FXML
     public void handleCameraForward(ActionEvent actionEvent) {
-        camera.movePosition(new Vector3f(0, 0, -TRANSLATION));
+        mainCamera.movePosition(new Vector3f(0, 0, -TRANSLATION));
     }
 
     @FXML
     public void handleCameraBackward(ActionEvent actionEvent) {
-        camera.movePosition(new Vector3f(0, 0, TRANSLATION));
+        mainCamera.movePosition(new Vector3f(0, 0, TRANSLATION));
     }
 
     @FXML
     public void handleCameraLeft(ActionEvent actionEvent) {
-        camera.movePosition(new Vector3f(TRANSLATION, 0, 0));
+        mainCamera.movePosition(new Vector3f(TRANSLATION, 0, 0));
     }
 
     @FXML
     public void handleCameraRight(ActionEvent actionEvent) {
-        camera.movePosition(new Vector3f(-TRANSLATION, 0, 0));
+        mainCamera.movePosition(new Vector3f(-TRANSLATION, 0, 0));
     }
 
     @FXML
     public void handleCameraUp(ActionEvent actionEvent) {
-        camera.movePosition(new Vector3f(0, TRANSLATION, 0));
+        mainCamera.movePosition(new Vector3f(0, TRANSLATION, 0));
     }
 
     @FXML
     public void handleCameraDown(ActionEvent actionEvent) {
-        camera.movePosition(new Vector3f(0, -TRANSLATION, 0));
+        mainCamera.movePosition(new Vector3f(0, -TRANSLATION, 0));
     }
 }

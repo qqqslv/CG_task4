@@ -11,12 +11,20 @@ public class Model {
     public ArrayList<Vector3f> normals = new ArrayList<Vector3f>();
     public ArrayList<Polygon> polygons = new ArrayList<Polygon>();
     public String name;
+    public boolean verticesVisible = false;
     public String getName() {
         return name;
     }
     public void setName(String name) {
         this.name = name;
     }
+    public boolean isVerticesVisible() {
+        return verticesVisible;
+    }
+    public void setVerticesVisible(boolean verticesVisible) {
+        this.verticesVisible = verticesVisible;
+    }
+
 
     public void computeNormals() { //https://github.com/SysoevaSvetlana/CGtask3/blob/main/ObjReaderInitial/src/com/cgvsu/model/Model.java
 

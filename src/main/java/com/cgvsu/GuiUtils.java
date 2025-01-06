@@ -2,7 +2,9 @@ package com.cgvsu;
 
 import com.cgvsu.model.Model;
 import com.cgvsu.objreader.ObjReader;
+import com.cgvsu.render_engine.Camera;
 
+import javax.vecmath.Vector3f;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,7 +14,9 @@ import java.util.List;
 
 public class GuiUtils {
     public static List<Model> models = new ArrayList<>();
+    public static List<Camera> cameras = new ArrayList<>();
     public static Model selectedModel;
+    public static Camera selectedCamera;
     public static Model loadModelFromFile(File file) {
         Path fileName = Path.of(file.getAbsolutePath());
         try {
@@ -44,5 +48,21 @@ public class GuiUtils {
                 selectedModel = null;
             }
         }
+    }
+    public static void setCamera(Camera camera, float x, float y, float z, float targetX, float targetY, float targetZ, float fov) {
+        camera.setPosition(new Vector3f(x, y, z));
+        camera.setTarget(new Vector3f(targetX, targetY, targetZ));
+        camera.setFov(fov);
+    }
+
+
+    public static Camera createCamera(float x, float y, float z) {
+        return new Camera(new Vector3f(x, y, z), new Vector3f(0, 0, 0), 1.0F, 1, 0.01F, 100);
+    }
+    public static void removeCamera(Camera camera) {
+        if (camera == null) {
+            return;
+        }
+        cameras.remove(camera);
     }
 }
