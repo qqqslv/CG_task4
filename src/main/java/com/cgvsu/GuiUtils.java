@@ -33,8 +33,8 @@ public class GuiUtils {
             System.err.println("Не удалось загрузить модель из файла");
             return null;
         }
+        model.setName(file.getName());
         models.add(model);
         return model;
-        //нужно добавить название модели
     }
 }

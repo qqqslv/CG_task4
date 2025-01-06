@@ -10,8 +10,7 @@ import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
@@ -26,6 +25,7 @@ import javax.vecmath.Vector3f;
 import com.cgvsu.model.Model;
 import com.cgvsu.render_engine.Camera;
 
+import static com.cgvsu.GuiUtils.models;
 import static com.cgvsu.GuiUtils.selectedModel;
 
 public class GuiController {
@@ -37,13 +37,15 @@ public class GuiController {
 
     @FXML
     private Canvas canvas;
-
-    private Model mesh = null;
+    @FXML
+    private ListView<Model> modelListView;
+    @FXML
+    private TitledPane selectionModelsPane;
 
     private Camera camera = new Camera(
-            new Vector3f(0, 00, 100),
+            new Vector3f(0, 0, 200),
             new Vector3f(0, 0, 0),
-            1.0F, 1, 0.01F, 100);
+            1.0F, 1, 0.01F, 200);
 
     private Timeline timeline;
 
@@ -62,14 +64,35 @@ public class GuiController {
             canvas.getGraphicsContext2D().clearRect(0, 0, width, height);
             camera.setAspectRatio((float) (width / height));
 
-            if (mesh != null) {
-                RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, (int) width, (int) height);
+            for (Model model : models) {
+                RenderEngine.render(canvas.getGraphicsContext2D(), camera, model, (int) width, (int) height);
             }
         });
 
         timeline.getKeyFrames().add(frame);
         timeline.play();
+
+        modelListView.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(Model model, boolean empty) {
+                super.updateItem(model, empty);
+
+                if (empty || model == null) {
+                    setText(null);
+                    setContextMenu(null);
+                } else {
+                    setText(model.getName());
+
+                    ContextMenu contextMenu = new ContextMenu();
+                    MenuItem deleteItem = new MenuItem("Удалить");
+                    deleteItem.setOnAction(e -> {
+                        ///Прописать удаление
+                    });
+                }
+            }
+        });
     }
+
     private void showExceptionMessage(String text) {
         Stage excStage = new Stage();
         excStage.setTitle("Уведомление");
@@ -105,9 +128,11 @@ public class GuiController {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
         fileChooser.setTitle("Загрузить модель");
 
-        //доработать, нужно составить примерный gui в SceneBuilder и заменить canvas чем-то
-        File file = fileChooser.showOpenDialog(canvas.getScene().getWindow());
+        File file = fileChooser.showOpenDialog(modelListView.getScene().getWindow());
         Model model = GuiUtils.addModel(file);
+        if (model != null) {
+            modelListView.getItems().add(model);
+        }
     }
 
     @FXML
@@ -131,6 +156,10 @@ public class GuiController {
         } catch (IOException exception) {
             showExceptionMessage("Не удалось сохранить модель: " + exception.getMessage());
         }
+    }
+    @FXML
+    void setSelectionModelsPane() {
+        System.out.println("lol");
     }
 
     @FXML
