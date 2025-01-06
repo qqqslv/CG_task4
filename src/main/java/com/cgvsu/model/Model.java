@@ -26,7 +26,8 @@ public class Model {
     }
 
 
-    public void computeNormals() { //https://github.com/SysoevaSvetlana/CGtask3/blob/main/ObjReaderInitial/src/com/cgvsu/model/Model.java
+    // https://github.com/SysoevaSvetlana/CGtask3/blob/main/ObjReaderInitial/src/com/cgvsu/model/Model.java
+    public void computeNormals() {
 
         Map<Integer, Vector3f> vertexNormals = new HashMap<>();
         Map<Integer, Integer> vertexNormalsCount = new HashMap<>();
@@ -42,8 +43,8 @@ public class Model {
             Vector3f v1 = vertices.get(vertexIndices.get(1));
             Vector3f v2 = vertices.get(vertexIndices.get(2));
 
-            Vector3f edge1 = v1.subtract(v0);
-            Vector3f edge2 = v2.subtract(v0);
+            Vector3f edge1 = v1.sub(v0);
+            Vector3f edge2 = v2.sub(v0);
             Vector3f faceNormal = edge1.cross(edge2).normalize();
 
             for (int index : vertexIndices) {
@@ -67,11 +68,9 @@ public class Model {
             }
         }
 
-
         for (Integer index : vertexNormals.keySet()) {
-            vertexNormals.put(index, vertexNormals.get(index).divide(vertexNormalsCount.get(index)));
+            vertexNormals.put(index, vertexNormals.get(index).div(vertexNormalsCount.get(index)));
         }
-
 
         normals = new ArrayList<>();
         for (int i = 0; i < vertices.size(); i++) {
