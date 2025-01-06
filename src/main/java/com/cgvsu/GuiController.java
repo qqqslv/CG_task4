@@ -11,6 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
@@ -87,6 +88,16 @@ public class GuiController {
                     MenuItem deleteItem = new MenuItem("Удалить");
                     deleteItem.setOnAction(e -> {
                         ///Прописать удаление
+                    });
+
+                    setOnMouseClicked(event -> {
+                        if (event.getButton() == MouseButton.PRIMARY) {
+                            if (selectedModel == model) {
+                                selectedModel = null;
+                            } else {
+                                selectedModel = model;
+                            }
+                        }
                     });
                 }
             }
