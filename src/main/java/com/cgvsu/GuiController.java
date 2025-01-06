@@ -41,7 +41,7 @@ public class GuiController {
     @FXML
     private ListView<Model> modelListView;
     @FXML
-    private TitledPane selectionModelsPane;
+    private ListView<Model> vertexListView;
 
     private Camera camera = new Camera(
             new Vector3f(0, 0, 200),
@@ -83,12 +83,6 @@ public class GuiController {
                     setContextMenu(null);
                 } else {
                     setText(model.getName());
-
-                    ContextMenu contextMenu = new ContextMenu();
-                    MenuItem deleteItem = new MenuItem("Удалить");
-                    deleteItem.setOnAction(e -> {
-                        ///Прописать удаление
-                    });
 
                     setOnMouseClicked(event -> {
                         if (event.getButton() == MouseButton.PRIMARY) {
@@ -134,6 +128,18 @@ public class GuiController {
 
     }
     @FXML
+    void onDeleteModel() {
+        if (selectedModel == null) {
+            showExceptionMessage("Не выбрана модель для удаления");
+            return;
+        }
+        GuiUtils.deleteModel(selectedModel);
+        vertexListView.getItems().clear();
+        modelListView.getItems().remove(modelListView.getSelectionModel().getSelectedItem());
+        selectedModel = null;
+        modelListView.getSelectionModel().clearSelection();
+    }
+    @FXML
     private void onAddModelMenuItemClick() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
@@ -167,10 +173,6 @@ public class GuiController {
         } catch (IOException exception) {
             showExceptionMessage("Не удалось сохранить модель: " + exception.getMessage());
         }
-    }
-    @FXML
-    void setSelectionModelsPane() {
-        System.out.println("lol");
     }
 
     @FXML

@@ -37,4 +37,12 @@ public class GuiUtils {
         models.add(model);
         return model;
     }
+    public static void deleteModel(Model model) {
+        if (model != null && models != null) {
+            models.remove(model);
+            if (selectedModel == model) {
+                selectedModel = null;
+            }
+        }
+    }
 }
