@@ -3,6 +3,7 @@ package com.cgvsu;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
@@ -21,6 +22,7 @@ public class Simple3DViewer extends Application {
         viewport.prefWidthProperty().bind(scene.widthProperty());
         viewport.prefHeightProperty().bind(scene.heightProperty());
 
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("icon.png")));
         stage.setTitle("Окно приложения");
         stage.setScene(scene);
         stage.show();

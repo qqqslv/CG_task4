@@ -190,7 +190,7 @@ public class GuiController {
         excStage.setScene(scene);
 
         excStage.show();
-
+//--------------------------------Камеры------------------------------------------
     }
     private void openEditDialog(Camera camera) {
         if (camera == null) return;
@@ -279,15 +279,17 @@ public class GuiController {
     }
     @FXML
     void onAddCamera() {
-        if (!Objects.equals(camX.getText(), "") && !Objects.equals(camY.getText(), "") && !Objects.equals(camZ.getText(), "")) {
+        try {
             float x = Float.parseFloat(camX.getText());
             float y = Float.parseFloat(camY.getText());
             float z = Float.parseFloat(camZ.getText());
+
             Camera newCamera = GuiUtils.createCamera(x, y, z);
-            cameras.add(newCamera);
+
             camerasListView.getItems().add(newCamera);
-        } else {
-            showExceptionMessage("Введены не все координаты камеры");
+            camerasListView.getSelectionModel().select(newCamera);
+        } catch (NumberFormatException e) {
+            showExceptionMessage("Некорректные координаты камеры");
         }
     }
     @FXML
@@ -300,17 +302,13 @@ public class GuiController {
     }
     @FXML
     void onDeleteCamera() {
-        if (selectedCamera != null && (cameras.size() > 1) && !selectedCamera.equals(mainCamera)) {
+        if (selectedCamera != null) {
             GuiUtils.removeCamera(selectedCamera);
-            camerasListView.getItems().remove(camerasListView.getSelectionModel().getSelectedItem());
-            selectedCamera = mainCamera;
-            String s = "Main camera " + selectedCamera.getPosition();
-            camerasListView.getSelectionModel().select(camerasListView.getItems().get(0));
         } else {
-            showExceptionMessage("Невозможно удалить камеру");
+            showExceptionMessage("Выберите камеру перед удалением.");
         }
     }
-
+//----------------------------------Вершины----------------------------------------
     private void renderScene() {
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
@@ -422,7 +420,7 @@ public class GuiController {
             updateVertexList();
         }
     }
-
+//-----------------------------------Модели----------------------------------------
     @FXML
     void onDeleteModel() {
         if (selectedModel == null) {
