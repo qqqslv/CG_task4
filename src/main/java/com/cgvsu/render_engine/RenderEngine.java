@@ -1,6 +1,8 @@
 package com.cgvsu.render_engine;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import com.cgvsu.math.Vector3f;
 import com.cgvsu.model.Polygon;
@@ -13,6 +15,7 @@ import static com.cgvsu.render_engine.GraphicConveyor.*;
 
 public class RenderEngine {
     public static ArrayList<Integer> selectedVertexIndices = new ArrayList<>();
+    private static List<Vector3f> trsList = new ArrayList<>(Arrays.asList(new Vector3f(0,0,0), new Vector3f(0,0,0), new Vector3f(1.0f,1.0f,1.0f)));
     private static final double POINT_SIZE = 6.0;
 
     public static void render(
@@ -123,5 +126,9 @@ public class RenderEngine {
         } else {
             selectedVertexIndices.add(index);
         }
+    }
+
+    public static void setTrsList(List<Vector3f> trsList) {
+        RenderEngine.trsList = trsList;
     }
 }

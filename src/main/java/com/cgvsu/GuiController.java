@@ -31,7 +31,7 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.io.File;
-import java.util.Objects;
+import java.util.Arrays;
 
 import com.cgvsu.model.Model;
 import com.cgvsu.render_engine.Camera;
@@ -44,7 +44,7 @@ import static com.cgvsu.render_engine.RenderEngine.resetSelectedVertices;
 
 public class GuiController {
 
-    final private float TRANSLATION = 0.5F;
+    final private float TRANSLATION = 1.5F;
 
     @FXML
     AnchorPane anchorPane;
@@ -58,6 +58,33 @@ public class GuiController {
     @FXML
     private TextField camZ;
     @FXML
+    private TextField rotateX;
+
+    @FXML
+    private TextField rotateY;
+
+    @FXML
+    private TextField rotateZ;
+
+    @FXML
+    private TextField scaleX;
+
+    @FXML
+    private TextField scaleY;
+
+    @FXML
+    private TextField scaleZ;
+
+    @FXML
+    private TextField translationX;
+
+    @FXML
+    private TextField translationY;
+
+    @FXML
+    private TextField translationZ;
+
+    @FXML
     private ListView<Camera> camerasListView;
     @FXML
     private ListView<Model> modelListView;
@@ -65,7 +92,6 @@ public class GuiController {
     private ListView<String> vertexListView;
     @FXML
     private ToggleButton verticesToggleButton;
-    private boolean isSelectedCamera = false;
 
     private Camera mainCamera = new Camera(
             new Vector3f(0, 0, 200),
@@ -89,8 +115,8 @@ public class GuiController {
             canvas.getGraphicsContext2D().clearRect(0, 0, width, height);
             mainCamera.setAspectRatio((float) (width / height));
 
-            for (Model model : models) {
-                RenderEngine.render(canvas.getGraphicsContext2D(), mainCamera, model, (int) width, (int) height);
+            if (selectedModel != null) {
+                RenderEngine.render(canvas.getGraphicsContext2D(), mainCamera, selectedModel, (int) width, (int) height);
             }
         });
 
@@ -190,10 +216,32 @@ public class GuiController {
         excStage.setScene(scene);
 
         excStage.show();
+    }
 //--------------------------------Камеры------------------------------------------
+    @FXML
+    void onApplyTRSButton() {
+        try {
+            float sX = Float.parseFloat(scaleX.getText());
+            float sY = Float.parseFloat(scaleY.getText());
+            float sZ = Float.parseFloat(scaleZ.getText());
+
+            float rX = Float.parseFloat(rotateX.getText());
+            float rY = Float.parseFloat(rotateY.getText());
+            float rZ = Float.parseFloat(rotateZ.getText());
+
+            float tX = Float.parseFloat(translationX.getText());
+            float tY = Float.parseFloat(translationY.getText());
+            float tZ = Float.parseFloat(translationZ.getText());
+
+            RenderEngine.setTrsList(Arrays.asList(new Vector3f(tX,tY,tZ), new Vector3f(rX,rY,rZ), new Vector3f(sX,sY,sZ)));
+        } catch (NumberFormatException exc) {
+            showExceptionMessage("Введены некорректные числа");
+        }
     }
     private void openEditDialog(Camera camera) {
-        if (camera == null) return;
+        if (camera == null) {
+            return;
+        }
 
         Stage editStage = new Stage();
         editStage.initStyle(StageStyle.TRANSPARENT);
@@ -203,7 +251,6 @@ public class GuiController {
 
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(15));
-        layout.setAlignment(Pos.CENTER);
 
         Label positionLabel = new Label("Позиция камеры:");
         TextField xField = new TextField(String.valueOf(camera.getPosition().x));
@@ -213,13 +260,13 @@ public class GuiController {
         TextField zField = new TextField(String.valueOf(camera.getPosition().z));
         zField.setPromptText("Z координата");
 
-        Label targetLabel = new Label("Цель камеры:");
+        Label targetLabel = new Label("Таргет камеры:");
         TextField targetXField = new TextField(String.valueOf(camera.getTarget().x));
-        targetXField.setPromptText("X координата цели");
+        targetXField.setPromptText("X координата таргета");
         TextField targetYField = new TextField(String.valueOf(camera.getTarget().y));
-        targetYField.setPromptText("Y координата цели");
+        targetYField.setPromptText("Y координата таргета");
         TextField targetZField = new TextField(String.valueOf(camera.getTarget().z));
-        targetZField.setPromptText("Z координата цели");
+        targetZField.setPromptText("Z координата таргета");
 
         Label fovLabel = new Label("FOV:");
         Slider fovSlider = new Slider(0.1, 180, camera.getFov());
@@ -241,9 +288,9 @@ public class GuiController {
                 new Label("Y:"), yField,
                 new Label("Z:"), zField,
                 targetLabel,
-                new Label("Цель X:"), targetXField,
-                new Label("Цель Y:"), targetYField,
-                new Label("Цель Z:"), targetZField,
+                new Label("Таргет X:"), targetXField,
+                new Label("Таргет Y:"), targetYField,
+                new Label("Таргет Z:"), targetZField,
                 fovLabel, fovSlider,
                 buttonBox
         );
@@ -438,6 +485,7 @@ public class GuiController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
         fileChooser.setTitle("Загрузить модель");
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
 
         File file = fileChooser.showOpenDialog(modelListView.getScene().getWindow());
         Model model = GuiUtils.addModel(file);
@@ -455,6 +503,7 @@ public class GuiController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
         fileChooser.setTitle("Сохранить модель");
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
 
         File file = fileChooser.showSaveDialog(canvas.getScene().getWindow());
         if (file == null) {

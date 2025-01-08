@@ -46,7 +46,6 @@ class ObjReaderTest {
             Assertions.assertEquals(expectedError, exception.getMessage());
         }
     }
-
     @Test
     public void testParseVertex05() {
         // АГААА! Вот тест, который говорит, что у метода нет проверки на более, чем 3 числа

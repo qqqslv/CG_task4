@@ -32,7 +32,6 @@ public class GuiUtils {
         if (file == null) {
             return null;
         }
-
         Model model = loadModelFromFile(file);
         if (model == null) {
             System.err.println("Не удалось загрузить модель из файла");
@@ -45,9 +44,7 @@ public class GuiUtils {
     public static void deleteModel(Model model) {
         if (model != null && models != null) {
             models.remove(model);
-            if (selectedModel == model) {
-                selectedModel = null;
-            }
+            selectedModel = null;
         }
     }
     //----------------------------------Камеры------------------------------------------
@@ -64,9 +61,6 @@ public class GuiUtils {
             return;
         }
         cameras.remove(camera);
-//        if (selectedCamera == camera) {
-//            selectedCamera = null;
-//        }
         selectedCamera = null;
     }
 //----------------------------------------------------------------------------------
