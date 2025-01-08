@@ -1,12 +1,14 @@
-package com.cgvsu.math;
+package com.cgvsu.math.matrix;
 
-import javax.vecmath.Tuple3f;
-import java.util.Arrays;
+import com.cgvsu.math.vector.Vector4f;
 
 import static com.cgvsu.math.Global.EPS;
 
 
 public class Matrix4f {
+    private float[][] mat;
+    static final private int SIZE = 4;
+
     public Matrix4f(float[][] mat) {
         if (mat.length != SIZE || mat[0].length != SIZE) {
             throw new IllegalArgumentException("Matrix must be 4x4");
@@ -35,8 +37,14 @@ public class Matrix4f {
         this.mat = new float[SIZE][SIZE];
     }
 
-    private float[][] mat;
-    static final private int SIZE = 4;
+    public static Matrix4f identity() {
+        Matrix4f matrix = new Matrix4f();
+        for (int i = 0; i < 4; i++) {
+            matrix.setAt(i, i, 1.0f);
+        }
+
+        return matrix;
+    }
 
     public float getAt(int row, int col) {
         if (row < 0 || row >= mat.length || col < 0 || col >= mat[0].length) {
@@ -52,7 +60,6 @@ public class Matrix4f {
         }
         mat[row][col] = value;
     }
-
 
     public Matrix4f add(final Matrix4f m2) {
         for (int i = 0; i < 4; i++) {
@@ -89,7 +96,7 @@ public class Matrix4f {
         return this;
     }
 
-    public Vector4f mulVector(final Vector4f v) {
+    public Vector4f mulVector4(final Vector4f v) {
         float[] arr = new float[]{v.x, v.y, v.z, v.w};
         float[] res = new float[SIZE];
         for (int row = 0; row < SIZE; row++) {

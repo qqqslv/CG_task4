@@ -1,4 +1,4 @@
-package com.cgvsu.math;
+package com.cgvsu.math.vector;
 
 import static com.cgvsu.math.Global.EPS;
 

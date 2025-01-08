@@ -1,5 +1,6 @@
 package com.cgvsu;
 
+import com.cgvsu.math.vector.Vector3f;
 import com.cgvsu.objwriter.ObjWriter;
 import com.cgvsu.render_engine.RenderEngine;
 import javafx.collections.FXCollections;
@@ -35,7 +36,6 @@ import java.util.Objects;
 
 import com.cgvsu.model.Model;
 import com.cgvsu.render_engine.Camera;
-import com.cgvsu.math.*;
 
 
 import static com.cgvsu.GuiUtils.*;
@@ -44,7 +44,7 @@ import static com.cgvsu.render_engine.RenderEngine.resetSelectedVertices;
 
 public class GuiController {
 
-    final private float TRANSLATION = 0.5F;
+    final private float TRANSLATION = 4.5F;
 
     @FXML
     AnchorPane anchorPane;
@@ -70,7 +70,7 @@ public class GuiController {
     private Camera mainCamera = new Camera(
             new Vector3f(0, 0, 200),
             new Vector3f(0, 0, 0),
-            1.0F, 1, 0.01F, 200);
+            1.0F, 1, 0.01F, 400);
 
     private Timeline timeline;
 
@@ -366,7 +366,7 @@ public class GuiController {
 
         if (selectedModel != null) {
             for (int i = 0; i < selectedModel.vertices.size(); i++) {
-                com.cgvsu.math.Vector3f vertex = selectedModel.vertices.get(i);
+                Vector3f vertex = selectedModel.vertices.get(i);
                 vertexListView.getItems().add("Vertex " + i + ": (" + vertex.getX() + ", " + vertex.getY() + ", " + vertex.getZ() + ")");
             }
         }
