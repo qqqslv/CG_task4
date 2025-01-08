@@ -1,4 +1,6 @@
-package com.cgvsu.math;
+package com.cgvsu.math.matrix;
+
+import com.cgvsu.math.vector.Vector3f;
 
 import static com.cgvsu.math.Global.EPS;
 

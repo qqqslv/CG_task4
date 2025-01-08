@@ -2,7 +2,8 @@ package com.cgvsu.render_engine;
 
 import java.util.ArrayList;
 
-import com.cgvsu.math.Vector3f;
+import com.cgvsu.math.matrix.Matrix4f;
+import com.cgvsu.math.vector.Vector3f;
 import com.cgvsu.model.Polygon;
 import javafx.scene.canvas.GraphicsContext;
 import com.cgvsu.math.*;
@@ -22,7 +23,7 @@ public class RenderEngine {
             final int width,
             final int height)
     {
-        Matrix4f modelMatrix = rotateScaleTranslate();
+        Matrix4f modelMatrix = rotateScaleTranslate(new Vector3f(0, 0, 0), Math.toRadians(0), Math.toRadians(0), Math.toRadians(0), new Vector3f(1.0f, 1.0f, 1.0f));
         Matrix4f viewMatrix = camera.getViewMatrix();
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
 
@@ -38,9 +39,7 @@ public class RenderEngine {
             for (int vertexInPolygonInd = 0; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {
                 Vector3f vertex = model.vertices.get(model.polygons.get(polygonInd).getVertexIndices().get(vertexInPolygonInd));
 
-                Vector3f vertexVecmath = new Vector3f(vertex.getX(), vertex.getY(), vertex.getZ());
-
-                Point2f resultPoint = vertexToPoint(multiplyMatrix4ByVector3(modelViewProjectionMatrix, vertexVecmath), width, height);
+                Point2f resultPoint = vertexToPoint(multiplyMatrix4ByVector3(modelViewProjectionMatrix, vertex), width, height);
                 resultPoints.add(resultPoint);
             }
 
