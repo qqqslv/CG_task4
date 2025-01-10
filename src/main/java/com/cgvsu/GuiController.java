@@ -1,5 +1,6 @@
 package com.cgvsu;
 
+import com.cgvsu.math.ATTransformator;
 import com.cgvsu.math.vector.Vector3f;
 import com.cgvsu.objwriter.ObjWriter;
 import com.cgvsu.render_engine.RenderEngine;
@@ -32,11 +33,9 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.io.File;
-import java.util.Arrays;
 
 import com.cgvsu.model.Model;
 import com.cgvsu.render_engine.Camera;
-
 
 import static com.cgvsu.GuiUtils.*;
 import static com.cgvsu.render_engine.RenderEngine.*;
@@ -93,6 +92,8 @@ public class GuiController {
     @FXML
     private ToggleButton verticesToggleButton;
 
+    private int selectedIndex;
+
     private Camera mainCamera = new Camera(
             new Vector3f(0, 0, 200),
             new Vector3f(0, 0, 0),
@@ -122,7 +123,6 @@ public class GuiController {
 
         timeline.getKeyFrames().add(frame);
         timeline.play();
-
         modelListView.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(Model model, boolean empty) {
@@ -146,6 +146,7 @@ public class GuiController {
                                 updateVertexList();
                                 resetSelectedVertices();
                             }
+                            selectedIndex = modelListView.getSelectionModel().getSelectedIndex();
                         }
                     });
                 }
@@ -233,11 +234,23 @@ public class GuiController {
             float tY = Float.parseFloat(translationY.getText());
             float tZ = Float.parseFloat(translationZ.getText());
 
-            RenderEngine.setTrsList(Arrays.asList(new Vector3f(tX,tY,tZ), new Vector3f(rX,rY,rZ), new Vector3f(sX,sY,sZ)));
+            ATTransformator.ATBuilder builder = new ATTransformator.ATBuilder();
+            builder.scaleByCoordinates(sX, sY, sZ)
+                    .rotateByX((float) Math.toRadians(rX))
+                    .rotateByY((float) Math.toRadians(rY))
+                    .rotateByZ((float) Math.toRadians(rZ))
+                    .translateByCoordinates(tX, tY, tZ);
+
+            selectedModel = builder.build().applyTransformationToModel(selectedModel);
+
+            String selectedModelName = modelListView.getItems().get(selectedIndex).getName();
+            modelListView.getItems().set(selectedIndex, selectedModel);
+            modelListView.getItems().get(selectedIndex).setName(selectedModelName);
         } catch (NumberFormatException exc) {
             showExceptionMessage("Введены некорректные числа");
         }
     }
+
     private void openEditDialog(Camera camera) {
         if (camera == null) {
             return;
@@ -365,8 +378,8 @@ public class GuiController {
         double canvasHeight = canvas.getHeight();
         mainCamera.setAspectRatio((float) (canvasWidth / canvasHeight));
 
-        for (Model model : models) {
-            RenderEngine.render(gc, mainCamera, model, (int) canvasWidth, (int) canvasHeight);
+        if (selectedModel != null) {
+            RenderEngine.render(gc, mainCamera, selectedModel, (int) canvasWidth, (int) canvasHeight);
         }
     }
     private void updateButtonState() {

@@ -154,7 +154,8 @@ public class Matrix4f {
         return true;
     }
 
-    public void print() {
+    public void print(String text) {
+        System.out.println(text);
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 System.out.print(this.mat[i][j] + "\t");
@@ -162,4 +163,15 @@ public class Matrix4f {
             System.out.println();
         }
     }
+
+    public float[][] copy() {
+        float[][] matCopy = new float[SIZE][SIZE];
+
+        for (int i = 0; i < SIZE; i++) {
+            System.arraycopy(this.mat[i], 0, matCopy[i], 0, SIZE);
+        }
+
+        return matCopy;
+    }
+
 }

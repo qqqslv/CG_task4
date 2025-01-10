@@ -2,22 +2,11 @@ package com.cgvsu.render_engine;
 
 import com.cgvsu.math.*;
 import com.cgvsu.math.matrix.Matrix4f;
-import com.cgvsu.math.vector.Vector2f;
 import com.cgvsu.math.vector.Vector3f;
 
 public class GraphicConveyor {
-    public static Matrix4f rotateScaleTranslate(Vector3f translation, double rotationX, double rotationY, double rotationZ, Vector3f scale) {
-        Matrix4f translationMatrix = AffineTransformations.translation(translation);
-
-        Matrix4f rotationMatrix = AffineTransformations.rotationX(Matrix4f.identity(), rotationX);
-        AffineTransformations.rotationY(rotationMatrix, rotationY);
-        AffineTransformations.rotationZ(rotationMatrix, rotationZ);
-
-        Matrix4f scalingMatrix = AffineTransformations.scaling(scale);
-
-        Matrix4f modelMatrix = scalingMatrix.mult(rotationMatrix).mult(translationMatrix);
-
-        return new Matrix4f(modelMatrix);
+    public static Matrix4f rotateScaleTranslate() {
+        return Matrix4f.identity();
     }
 
     public static Matrix4f lookAt(Vector3f eye, Vector3f target) {

@@ -16,7 +16,6 @@ import static com.cgvsu.render_engine.GraphicConveyor.*;
 
 public class RenderEngine {
     public static ArrayList<Integer> selectedVertexIndices = new ArrayList<>();
-    private static List<Vector3f> trsList = new ArrayList<>(Arrays.asList(new Vector3f(0,0,0), new Vector3f(0,0,0), new Vector3f(1.0f,1.0f,1.0f)));
     private static final double POINT_SIZE = 6.0;
 
     public static void render(
@@ -26,13 +25,11 @@ public class RenderEngine {
             final int width,
             final int height)
     {
-        Matrix4f modelMatrix = rotateScaleTranslate(new Vector3f(0, 0, 0), Math.toRadians(0), Math.toRadians(0), Math.toRadians(0), new Vector3f(1.0f, 1.0f, 1.0f));
+        Matrix4f modelMatrix = rotateScaleTranslate();
         Matrix4f viewMatrix = camera.getViewMatrix();
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
 
-        Matrix4f modelViewProjectionMatrix = new Matrix4f(modelMatrix);
-        modelViewProjectionMatrix.mult(viewMatrix);
-        modelViewProjectionMatrix.mult(projectionMatrix);
+        Matrix4f modelViewProjectionMatrix = modelMatrix.mult(viewMatrix).mult(projectionMatrix);
 
         final int nPolygons = model.polygons.size();
         for (int polygonInd = 0; polygonInd < nPolygons; ++polygonInd) {
@@ -78,9 +75,8 @@ public class RenderEngine {
 
         for (int i = 0; i < nVertices; i++) {
             Vector3f vertex = model.vertices.get(i);
-            Vector3f vertexVecmath = new Vector3f(vertex.getX(), vertex.getY(), vertex.getZ());
 
-            Point2f screenPoint = vertexToPoint(multiplyMatrix4ByVector3(modelViewProjectionMatrix, vertexVecmath), width, height);
+            Point2f screenPoint = vertexToPoint(multiplyMatrix4ByVector3(modelViewProjectionMatrix, vertex), width, height);
 
             if (selectedVertexIndices.contains(i)) {
                 graphicsContext.setFill(Color.RED);
@@ -125,9 +121,5 @@ public class RenderEngine {
         } else {
             selectedVertexIndices.add(index);
         }
-    }
-
-    public static void setTrsList(List<Vector3f> trsList) {
-        RenderEngine.trsList = trsList;
     }
 }

@@ -5,6 +5,9 @@ import com.cgvsu.objreader.ObjReader;
 import com.cgvsu.render_engine.Camera;
 
 import com.cgvsu.math.vector.Vector3f;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableListBase;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,6 +18,7 @@ import java.util.List;
 public class GuiUtils {
     public static List<Model> models = new ArrayList<>();
     public static List<Camera> cameras = new ArrayList<>();
+
     public static Model selectedModel;
     public static Camera selectedCamera;
 //---------------------------Модели--------------------------------------------
@@ -41,6 +45,7 @@ public class GuiUtils {
         models.add(model);
         return model;
     }
+
     public static void deleteModel(Model model) {
         if (model != null && models != null) {
             models.remove(model);

@@ -4,6 +4,8 @@ import static com.cgvsu.math.Global.EPS;
 
 
 public class Vector4f {
+    public float x, y, z, w;
+
     public Vector4f(float x, float y, float z, float w) {
         this.x = x;
         this.y = y;
@@ -11,7 +13,21 @@ public class Vector4f {
         this.w = w;
     }
 
-    public float x, y, z, w;
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public float getZ() {
+        return z;
+    }
+
+    public float getW() {
+        return w;
+    }
 
     public Vector4f add(final Vector4f v) {
         this.x += v.x;
